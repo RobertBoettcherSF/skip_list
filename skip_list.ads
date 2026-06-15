@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.05
+--  Version: 0.06
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -30,11 +30,7 @@ is
    -- Type for node levels (0 to Max_Level)
    type Level_Type is range 0 .. Max_Level;
 
-   -- Type for forward pointers array
-   type Forward_Array is array (Level_Type) of access Node;
-   type Forward_Array_Access is access Forward_Array;
-
-   -- Node type for the skip list
+   -- Forward declaration for Node
    type Node;
    type Node_Access is access Node;
 
@@ -129,7 +125,7 @@ private
    type Node is record
       Key     : Element_Type;
       Value   : Element_Type;
-      Forward : Forward_Array_Access;
+      Forward : array (Level_Type) of Node_Access;
    end record;
 
    -- Skip List structure

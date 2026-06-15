@@ -5,7 +5,7 @@
 --  This project file configures the Skip List implementation for
 --  compilation with SPARK and GNAT.
 --  
---  Version: 0.05
+--  Version: 0.06
 --  Author: Vibe Code Agent
 --  Date: 2024
 

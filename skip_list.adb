@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.05
+--  Version: 0.06
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -57,13 +57,14 @@ is
       
       procedure Next_Level (Gen : in out Generator; Level : out Level_Type) is
          Rand : Float;
+         Max_Level_Int : constant Integer := Integer(Max_Level);
       begin
          Level := 0;
          -- Probabilistic level generation: P^level > random value
          -- This gives us the geometric distribution characteristic of skip lists
          loop
             Next_Random(Gen, Rand);
-            exit when Rand >= P or Level = Max_Level - 1;
+            exit when Rand >= P or Level = Level_Type(Max_Level_Int - 1);
             Level := Level + 1;
          end loop;
       end Next_Level;
@@ -72,33 +73,12 @@ is
    -- Global random generator instance
    Gen : Random_Generator.Generator;
 
-   -- Helper function to get forward pointer
-   function Get_Forward (N : Node_Access; L : Level_Type) return Node_Access is
-   begin
-      if N = null or N.Forward = null then
-         return null;
-      end if;
-      return N.Forward(L);
-   end Get_Forward;
-
-   -- Helper procedure to set forward pointer
-   procedure Set_Forward (N : Node_Access; L : Level_Type; Target : Node_Access) is
-   begin
-      if N = null then
-         return;
-      end if;
-      if N.Forward = null then
-         N.Forward := new Forward_Array'(others => null);
-      end if;
-      N.Forward(L) := Target;
-   end Set_Forward;
-
    -- Initialize the skip list
    procedure Initialize (List : out Skip_List_Type) is
    begin
       List.Head := new Node'(Key => Element_Type'First, 
                             Value => Element_Type'First,
-                            Forward => new Forward_Array'(others => null));
+                            Forward => (others => null));
       List.Current_Level := 0;
       List.Count := 0;
    end Initialize;
@@ -109,20 +89,18 @@ is
       Next_Node : Node_Access;
    begin
       -- Free all nodes except the head (which is always present)
-      while Get_Forward(Current, 0) /= null loop
-         Next_Node := Get_Forward(Current, 0);
-         Set_Forward(Current, 0, Get_Forward(Next_Node, 0));
+      while Current.Forward(0) /= null loop
+         Next_Node := Current.Forward(0);
+         Current.Forward(0) := Next_Node.Forward(0);
          -- Deallocate the node
          -- In SPARK, we use a simple approach for verification
          Free (Next_Node);
       end loop;
       
       -- Reset the head node's forward pointers
-      if List.Head /= null and List.Head.Forward /= null then
-         for I in Level_Type loop
-            List.Head.Forward(I) := null;
-         end loop;
-      end if;
+      for I in Level_Type loop
+         List.Head.Forward(I) := null;
+      end loop;
       
       List.Current_Level := 0;
       List.Count := 0;
@@ -130,18 +108,6 @@ is
 
    -- Deallocate a node (wrapper for memory management)
    procedure Free (Node_Ptr : Node_Access) is
-   begin
-      if Node_Ptr /= null and Node_Ptr.Forward /= null then
-         -- Free the forward array
-         Free (Node_Ptr.Forward);
-      end if;
-      -- In a real implementation, this would use Ada.Unchecked_Deallocation
-      -- For SPARK verification, we use a simpler approach
-      null;
-   end Free;
-
-   -- Deallocate a forward array
-   procedure Free (Arr : Forward_Array_Access) is
    begin
       -- In a real implementation, this would use Ada.Unchecked_Deallocation
       -- For SPARK verification, we use a simpler approach
@@ -151,7 +117,7 @@ is
    -- Check if the skip list is empty
    function Is_Empty (List : Skip_List_Type) return Boolean is
    begin
-      return List.Count = 0;
+      return List.Count = Ada.Containers.Count_Type(0);
    end Is_Empty;
 
    -- Get the number of elements in the skip list
@@ -185,21 +151,20 @@ is
                     Found : out Boolean) is
       Current : Node_Access := List.Head;
       Lvl : Level_Type := List.Current_Level;
-      Temp : Node_Access;
    begin
       Found := False;
       -- Start from the highest level and work down
       while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the search key
-         Temp := Get_Forward(Current, Lvl);
-         while Temp /= null and then Temp.Key < Key loop
-            Current := Temp;
-            Temp := Get_Forward(Current, Lvl);
+         while Current.Forward(Lvl) /= null and then 
+               Current.Forward(Lvl).Key < Key loop
+            Current := Current.Forward(Lvl);
          end loop;
           
          -- If we found the key at this level, return it
-         if Temp /= null and then Temp.Key = Key then
-            Value := Temp.Value;
+         if Current.Forward(Lvl) /= null and then 
+            Current.Forward(Lvl).Key = Key then
+            Value := Current.Forward(Lvl).Value;
             Found := True;
             return;
          end if;
@@ -226,10 +191,10 @@ is
    function Min_Key (List : Skip_List_Type) return Element_Type is
    begin
       -- The minimum key is the first element at level 0
-      if Get_Forward(List.Head, 0) = null then
+      if List.Head.Forward(0) = null then
          raise Empty_List_Error;
       end if;
-      return Get_Forward(List.Head, 0).Key;
+      return List.Head.Forward(0).Key;
    end Min_Key;
 
    -- Get the maximum key in the skip list
@@ -237,8 +202,8 @@ is
       Current : Node_Access := List.Head;
    begin
       -- Traverse level 0 to find the last element
-      while Get_Forward(Current, 0) /= null loop
-         Current := Get_Forward(Current, 0);
+      while Current.Forward(0) /= null loop
+         Current := Current.Forward(0);
       end loop;
       
       if Current = List.Head then
@@ -261,7 +226,6 @@ is
       Lvl : Level_Type := List.Current_Level;
       New_Level : Level_Type;
       New_Node : Node_Access;
-      Temp : Node_Access;
       
    begin
       -- Check for duplicate key first
@@ -277,11 +241,10 @@ is
       
       -- Find the insertion positions at each level
       while Lvl >= 0 loop
-         Temp := Get_Forward(Current, Lvl);
          -- Move forward while the next node's key is less than the insertion key
-         while Temp /= null and then Temp.Key < Key loop
-            Current := Temp;
-            Temp := Get_Forward(Current, Lvl);
+         while Current.Forward(Lvl) /= null and then 
+               Current.Forward(Lvl).Key < Key loop
+            Current := Current.Forward(Lvl);
          end loop;
           
          -- Store the update position for this level
@@ -304,12 +267,12 @@ is
       end if;
       
       -- Create the new node
-      New_Node := new Node'(Key => Key, Value => Value, Forward => new Forward_Array'(others => null));
+      New_Node := new Node'(Key => Key, Value => Value, Forward => (others => null));
       
       -- Insert the new node at each level up to its assigned level
       for I in 0 .. New_Level loop
-         Set_Forward(New_Node, I, Get_Forward(Update(I), I));
-         Set_Forward(Update(I), I, New_Node);
+         New_Node.Forward(I) := Update(I).Forward(I);
+         Update(I).Forward(I) := New_Node;
       end loop;
       
       -- Increment the count
@@ -329,7 +292,6 @@ is
       Current : Node_Access := List.Head;
       Lvl : Level_Type := List.Current_Level;
       Node_To_Delete : Node_Access;
-      Temp : Node_Access;
       
    begin
       -- Initialize update array
@@ -339,11 +301,10 @@ is
       
       -- Find the node to delete at each level
       while Lvl >= 0 loop
-         Temp := Get_Forward(Current, Lvl);
          -- Move forward while the next node's key is less than the deletion key
-         while Temp /= null and then Temp.Key < Key loop
-            Current := Temp;
-            Temp := Get_Forward(Current, Lvl);
+         while Current.Forward(Lvl) /= null and then 
+               Current.Forward(Lvl).Key < Key loop
+            Current := Current.Forward(Lvl);
          end loop;
           
          -- Store the update position for this level
@@ -354,19 +315,17 @@ is
       end loop;
       
       -- Check if the node exists at level 0
-      Temp := Get_Forward(Update(0), 0);
-      if Temp = null or else Temp.Key /= Key then
+      if Update(0).Forward(0) = null or else Update(0).Forward(0).Key /= Key then
          Success := False;
          return;
       end if;
       
-      Node_To_Delete := Temp;
+      Node_To_Delete := Update(0).Forward(0);
       
       -- Remove the node from each level
       for I in 0 .. List.Current_Level loop
-         Temp := Get_Forward(Update(I), I);
-         if Temp = Node_To_Delete then
-            Set_Forward(Update(I), I, Get_Forward(Node_To_Delete, I));
+         if Update(I).Forward(I) = Node_To_Delete then
+            Update(I).Forward(I) := Node_To_Delete.Forward(I);
          end if;
       end loop;
       
@@ -376,7 +335,7 @@ is
       -- Update the current level if necessary
       -- (if the highest level is now empty, reduce current level)
       while List.Current_Level > 0 and then 
-            Get_Forward(List.Head, List.Current_Level) = null loop
+            List.Head.Forward(List.Current_Level) = null loop
          List.Current_Level := List.Current_Level - 1;
       end loop;
       
@@ -407,19 +366,19 @@ is
    -- Move cursor to the first element
    function First (List : Skip_List_Type) return Cursor is
    begin
-      if Get_Forward(List.Head, 0) = null then
+      if List.Head.Forward(0) = null then
          return No_Element;
       end if;
-      return (Node_Ptr => Get_Forward(List.Head, 0));
+      return (Node_Ptr => List.Head.Forward(0));
    end First;
 
    -- Move cursor to the next element
    function Next (List : Skip_List_Type; Position : Cursor) return Cursor is
    begin
-      if Get_Forward(Position.Node_Ptr, 0) = null then
+      if Position.Node_Ptr.Forward(0) = null then
          return No_Element;
       end if;
-      return (Node_Ptr => Get_Forward(Position.Node_Ptr, 0));
+      return (Node_Ptr => Position.Node_Ptr.Forward(0));
    end Next;
 
 begin
