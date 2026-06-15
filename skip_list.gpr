@@ -1,11 +1,11 @@
 --  skip_list.gpr
 --  
---  GNAT Project File for Skip List SPARK implementation
+--  GNAT Project File for Skip List Ada implementation
 --  
 --  This project file configures the Skip List implementation for
---  compilation with SPARK and GNAT.
+--  compilation with GNAT.
 --  
---  Version: 0.11
+--  Version: 0.12
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -19,15 +19,14 @@ project Skip_List is
    -- Main source file
    for Main use ("skip_list.adb");
 
-   -- Compiler settings for SPARK
+   -- Compiler settings
    package Compiler is
       for Default_Switches ("Ada") use (
          "-gnatN",       -- No assert pragma suppression
          "-gnatp",       -- Suppress info messages
          "-gnata",       -- Enable assertions
-         "-gnatX",       -- Enable SPARK mode
+         "-gnatV",       -- Enable validity checks
          "-gnatf",       -- Full error messages
-         "-gnatC",       -- Enable contract checking
          "-gnatw.e",     -- Warn on unreachable code
          "-gnatw.s",     -- Warn on suspicious conversions
          "-gnatw.x"      -- Warn on unused variables

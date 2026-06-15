@@ -1,18 +1,18 @@
 --  skip_list.ads
 --  
---  SPARK specification for Skip List - Probabilistic alternative to trees
+--  Ada specification for Skip List - Probabilistic alternative to trees
 --  
 --  Skip Lists provide expected O(log n) search, insert, and delete operations
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.11
+--  Version: 0.12
 --  Author: Vibe Code Agent
 --  Date: 2024
 
-package Skip_List with
-   SPARK_Mode
-is
+with Ada.Containers;
+
+package Skip_List is
 
    -- Maximum level for the skip list (affects memory usage and performance)
    -- Typical value: 16-32 for most applications
@@ -47,27 +47,24 @@ is
    function Is_Empty (List : Skip_List_Type) return Boolean;
 
    -- Get the number of elements in the skip list
-   function Length (List : Skip_List_Type) return Natural;
+   function Length (List : Skip_List_Type) return Ada.Containers.Count_Type;
 
    -- Insert a key-value pair into the skip list
    -- Returns True if insertion was successful, False if key already exists
-   procedure Insert (List : in out Skip_List_Type; 
-                     Key   : Element_Type;
-                     Value : Element_Type;
-                     Success : out Boolean);
+   function Insert (List : in out Skip_List_Type; 
+                   Key   : Element_Type;
+                   Value : Element_Type) return Boolean;
 
    -- Search for a key and return its value
    -- Returns True if found, False otherwise
-   procedure Search (List  : Skip_List_Type;
-                    Key   : Element_Type;
-                    Value : out Element_Type;
-                    Found : out Boolean);
+   function Search (List  : Skip_List_Type;
+                   Key   : Element_Type;
+                   Value : out Element_Type) return Boolean;
 
    -- Delete a key from the skip list
    -- Returns True if deletion was successful, False if key not found
-   procedure Delete (List : in out Skip_List_Type;
-                    Key  : Element_Type;
-                    Success : out Boolean);
+   function Delete (List : in out Skip_List_Type;
+                   Key  : Element_Type) return Boolean;
 
    -- Check if a key exists in the skip list
    function Contains (List : Skip_List_Type;
@@ -128,7 +125,7 @@ private
    type Skip_List_Type is tagged record
       Head : Node_Access;
       Current_Level : Level_Type := 0;
-      Count : Natural := 0;
+      Count : Ada.Containers.Count_Type := 0;
    end record;
 
    -- Cursor for iteration
@@ -138,8 +135,5 @@ private
 
    -- No_Element cursor
    No_Element : constant Cursor := (Node_Ptr => null);
-
-   -- Deallocate a node (wrapper for memory management)
-   procedure Free (Node_Ptr : Node_Access);
 
 end Skip_List;

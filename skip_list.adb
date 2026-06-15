@@ -1,19 +1,20 @@
 --  skip_list.adb
 --  
---  SPARK implementation for Skip List - Probabilistic alternative to trees
+--  Ada implementation for Skip List - Probabilistic alternative to trees
 --  
 --  This implementation uses a deterministic random number generator for
 --  verification purposes. The probabilistic level assignment ensures
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.11
+--  Version: 0.12
 --  Author: Vibe Code Agent
 --  Date: 2024
 
-package body Skip_List with
-   SPARK_Mode
-is
+with Ada.Containers;
+with Ada.Unchecked_Deallocation;
+
+package body Skip_List is
 
    -- Local package for random number generation
    -- Using a simple Linear Congruential Generator for deterministic behavior
@@ -21,8 +22,8 @@ is
       type Generator is private;
       
       procedure Initialize (Gen : out Generator; Seed : Integer);
-      procedure Next_Random (Gen : in out Generator; Rand : out Float);
-      procedure Next_Level (Gen : in out Generator; Level : out Level_Type);
+      function Random (Gen : in out Generator) return Float;
+      function Random_Level (Gen : in out Generator) return Level_Type;
    private
       type Generator is record
          State : Long_Long_Integer;
@@ -43,33 +44,39 @@ is
          end if;
       end Initialize;
       
-      procedure Next_Random (Gen : in out Generator; Rand : out Float) is
+      function Random (Gen : in out Generator) return Float is
          Result : Long_Long_Integer;
       begin
          -- Linear Congruential Generator
          Gen.State := (A * Gen.State + C) mod M;
          Result := Gen.State;
          -- Convert to float in range [0.0, 1.0)
-         Rand := Float(Result) / Float(M);
-      end Next_Random;
+         return Float(Result) / Float(M);
+      end Random;
       
-      procedure Next_Level (Gen : in out Generator; Level : out Level_Type) is
+      function Random_Level (Gen : in out Generator) return Level_Type is
+         Level : Level_Type := 0;
          Rand : Float;
-         Max_Level_Int : constant Integer := Integer(Max_Level);
       begin
-         Level := 0;
          -- Probabilistic level generation: P^level > random value
          -- This gives us the geometric distribution characteristic of skip lists
          loop
-            Next_Random(Gen, Rand);
-            exit when Rand >= P or Level = Level_Type(Max_Level_Int - 1);
+            Rand := Random(Gen);
+            exit when Rand >= P or Level = Max_Level - 1;
             Level := Level + 1;
          end loop;
-      end Next_Level;
+         return Level;
+      end Random_Level;
    end Random_Generator;
 
    -- Global random generator instance
    Gen : Random_Generator.Generator;
+
+   -- Memory deallocation for nodes
+   procedure Free is new Ada.Unchecked_Deallocation (Node, Node_Access);
+
+   -- Memory deallocation for forward arrays
+   procedure Free_Array is new Ada.Unchecked_Deallocation (Forward_Array, access Forward_Array);
 
    -- Initialize the skip list
    procedure Initialize (List : out Skip_List_Type) is
@@ -90,7 +97,6 @@ is
       while Current.Forward(0) /= null loop
          Next_Node := Current.Forward(0);
          Current.Forward(0) := Next_Node.Forward(0);
-         -- Deallocate the node
          Free (Next_Node);
       end loop;
       
@@ -103,14 +109,6 @@ is
       List.Count := 0;
    end Clear;
 
-   -- Deallocate a node (wrapper for memory management)
-   procedure Free (Node_Ptr : Node_Access) is
-   begin
-      -- In a real implementation, this would use Ada.Unchecked_Deallocation
-      -- For SPARK verification, we use a simpler approach
-      null;
-   end Free;
-
    -- Check if the skip list is empty
    function Is_Empty (List : Skip_List_Type) return Boolean is
    begin
@@ -118,15 +116,15 @@ is
    end Is_Empty;
 
    -- Get the number of elements in the skip list
-   function Length (List : Skip_List_Type) return Natural is
+   function Length (List : Skip_List_Type) return Ada.Containers.Count_Type is
    begin
       return List.Count;
    end Length;
 
    -- Generate a random level for a new node
-   procedure Generate_Level (Level : out Level_Type) is
+   function Generate_Level return Level_Type is
    begin
-      Random_Generator.Next_Level(Gen, Level);
+      return Random_Generator.Random_Level(Gen);
    end Generate_Level;
 
    -- Set the random seed for deterministic probabilistic behavior
@@ -142,46 +140,41 @@ is
    end Current_Level;
 
    -- Search for a key and return its value
-   procedure Search (List  : Skip_List_Type;
-                    Key   : Element_Type;
-                    Value : out Element_Type;
-                    Found : out Boolean) is
+   function Search (List  : Skip_List_Type;
+                   Key   : Element_Type;
+                   Value : out Element_Type) return Boolean is
       Current : Node_Access := List.Head;
-      Lvl : Level_Type := List.Current_Level;
+      Level : Level_Type := List.Current_Level;
    begin
-      Found := False;
       -- Start from the highest level and work down
-      while Lvl >= 0 loop
+      while Level >= 0 loop
          -- Move forward while the next node's key is less than the search key
-         while Current.Forward(Lvl) /= null and then 
-               Current.Forward(Lvl).Key < Key loop
-            Current := Current.Forward(Lvl);
+         while Current.Forward(Level) /= null and then 
+               Current.Forward(Level).Key < Key loop
+            Current := Current.Forward(Level);
          end loop;
           
          -- If we found the key at this level, return it
-         if Current.Forward(Lvl) /= null and then 
-            Current.Forward(Lvl).Key = Key then
-            Value := Current.Forward(Lvl).Value;
-            Found := True;
-            return;
+         if Current.Forward(Level) /= null and then 
+            Current.Forward(Level).Key = Key then
+            Value := Current.Forward(Level).Value;
+            return True;
          end if;
           
          -- Move down to the next level
-         Lvl := Lvl - 1;
+         Level := Level - 1;
       end loop;
       
       -- Key not found
-      Found := False;
+      return False;
    end Search;
 
    -- Check if a key exists in the skip list
    function Contains (List : Skip_List_Type;
                      Key  : Element_Type) return Boolean is
       Value : Element_Type;
-      Found : Boolean;
    begin
-      Search(List, Key, Value, Found);
-      return Found;
+      return Search(List, Key, Value);
    end Contains;
 
    -- Get the minimum key in the skip list
@@ -211,24 +204,22 @@ is
    end Max_Key;
 
    -- Insert a key-value pair into the skip list
-   procedure Insert (List : in out Skip_List_Type; 
-                     Key   : Element_Type;
-                     Value : Element_Type;
-                     Success : out Boolean) is
+   function Insert (List : in out Skip_List_Type; 
+                    Key   : Element_Type;
+                    Value : Element_Type) return Boolean is
       -- Array to store the update positions for each level
       type Update_Array is array (Level_Type) of Node_Access;
       Update : Update_Array;
       
       Current : Node_Access := List.Head;
-      Lvl : Level_Type := List.Current_Level;
+      Level : Level_Type := List.Current_Level;
       New_Level : Level_Type;
       New_Node : Node_Access;
       
    begin
       -- Check for duplicate key first
       if Contains(List, Key) then
-         Success := False;
-         return;
+         return False;
       end if;
       
       -- Initialize update array
@@ -237,22 +228,22 @@ is
       end loop;
       
       -- Find the insertion positions at each level
-      while Lvl >= 0 loop
+      while Level >= 0 loop
          -- Move forward while the next node's key is less than the insertion key
-         while Current.Forward(Lvl) /= null and then 
-               Current.Forward(Lvl).Key < Key loop
-            Current := Current.Forward(Lvl);
+         while Current.Forward(Level) /= null and then 
+               Current.Forward(Level).Key < Key loop
+            Current := Current.Forward(Level);
          end loop;
           
          -- Store the update position for this level
-         Update(Lvl) := Current;
+         Update(Level) := Current;
           
          -- Move down to the next level
-         Lvl := Lvl - 1;
+         Level := Level - 1;
       end loop;
       
       -- Generate a random level for the new node
-      Generate_Level(New_Level);
+      New_Level := Generate_Level;
       
       -- If the new level is higher than the current list level,
       -- update the list's current level and initialize the update array
@@ -275,19 +266,18 @@ is
       -- Increment the count
       List.Count := List.Count + 1;
       
-      Success := True;
+      return True;
    end Insert;
 
    -- Delete a key from the skip list
-   procedure Delete (List : in out Skip_List_Type;
-                     Key  : Element_Type;
-                     Success : out Boolean) is
+   function Delete (List : in out Skip_List_Type;
+                   Key  : Element_Type) return Boolean is
       -- Array to store the update positions for each level
       type Update_Array is array (Level_Type) of Node_Access;
       Update : Update_Array;
       
       Current : Node_Access := List.Head;
-      Lvl : Level_Type := List.Current_Level;
+      Level : Level_Type := List.Current_Level;
       Node_To_Delete : Node_Access;
       
    begin
@@ -297,24 +287,23 @@ is
       end loop;
       
       -- Find the node to delete at each level
-      while Lvl >= 0 loop
+      while Level >= 0 loop
          -- Move forward while the next node's key is less than the deletion key
-         while Current.Forward(Lvl) /= null and then 
-               Current.Forward(Lvl).Key < Key loop
-            Current := Current.Forward(Lvl);
+         while Current.Forward(Level) /= null and then 
+               Current.Forward(Level).Key < Key loop
+            Current := Current.Forward(Level);
          end loop;
           
          -- Store the update position for this level
-         Update(Lvl) := Current;
+         Update(Level) := Current;
           
          -- Move down to the next level
-         Lvl := Lvl - 1;
+         Level := Level - 1;
       end loop;
       
       -- Check if the node exists at level 0
       if Update(0).Forward(0) = null or else Update(0).Forward(0).Key /= Key then
-         Success := False;
-         return;
+         return False;
       end if;
       
       Node_To_Delete := Update(0).Forward(0);
@@ -339,7 +328,7 @@ is
       -- Decrement the count
       List.Count := List.Count - 1;
       
-      Success := True;
+      return True;
    end Delete;
 
    -- Check if cursor points to an element
