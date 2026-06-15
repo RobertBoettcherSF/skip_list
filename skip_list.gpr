@@ -5,7 +5,7 @@
 --  This project file configures the Skip List implementation for
 --  compilation with SPARK and GNAT.
 --  
---  Version: 0.03
+--  Version: 0.04
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -26,7 +26,6 @@ project Skip_List is
          "-gnatp",       -- Suppress info messages
          "-gnata",       -- Enable assertions
          "-gnatX",       -- Enable SPARK mode
-         "-gnatk",       -- Check all files
          "-gnatf",       -- Full error messages
          "-gnatC",       -- Enable contract checking
          "-gnatw.e",     -- Warn on unreachable code
@@ -34,12 +33,5 @@ project Skip_List is
          "-gnatw.x"      -- Warn on unused variables
       );
    end Compiler;
-
-   -- SPARK specific settings (lowercase 'spark' is the correct package name)
-   package spark is
-      for Flow_Analysis use "All";
-      for Proof use "On";
-      for Proof_Level use "Full";
-   end spark;
 
 end Skip_List;

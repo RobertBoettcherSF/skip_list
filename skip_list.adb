@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.03
+--  Version: 0.04
 --  Author: Vibe Code Agent
 --  Date: 2024
 
