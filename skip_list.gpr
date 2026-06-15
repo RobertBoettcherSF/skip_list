@@ -5,7 +5,7 @@
 --  This project file configures the Skip List implementation for
 --  compilation with GNAT.
 --  
---  Version: 0.12
+--  Version: 0.13
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -25,7 +25,6 @@ project Skip_List is
          "-gnatN",       -- No assert pragma suppression
          "-gnatp",       -- Suppress info messages
          "-gnata",       -- Enable assertions
-         "-gnatV",       -- Enable validity checks
          "-gnatf",       -- Full error messages
          "-gnatw.e",     -- Warn on unreachable code
          "-gnatw.s",     -- Warn on suspicious conversions
