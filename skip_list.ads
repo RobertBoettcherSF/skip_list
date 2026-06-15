@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.09
+--  Version: 0.10
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -28,13 +28,6 @@ is
    -- Type for node levels (0 to Max_Level)
    type Level_Type is range 0 .. Max_Level;
 
-   -- Node type for the skip list
-   type Node;
-   type Node_Access is access Node;
-
-   -- Forward pointer array type
-   type Forward_Array is array (Level_Type) of Node_Access;
-
    -- Skip List type
    type Skip_List_Type is tagged private;
 
@@ -49,9 +42,6 @@ is
 
    -- Clear the skip list, freeing all memory
    procedure Clear (List : in out Skip_List_Type);
-
-   -- Deallocate a node (wrapper for memory management)
-   procedure Free (Node_Ptr : Node_Access);
 
    -- Check if the skip list is empty
    function Is_Empty (List : Skip_List_Type) return Boolean;
@@ -125,6 +115,13 @@ is
 
 private
 
+   -- Node type for the skip list
+   type Node;
+   type Node_Access is access Node;
+
+   -- Forward pointer array type
+   type Forward_Array is array (Level_Type) of Node_Access;
+
    -- Node structure for skip list
    type Node is record
       Key     : Element_Type;
@@ -146,5 +143,8 @@ private
 
    -- No_Element cursor
    No_Element : constant Cursor := (Node_Ptr => null);
+
+   -- Deallocate a node (wrapper for memory management)
+   procedure Free (Node_Ptr : Node_Access);
 
 end Skip_List;
