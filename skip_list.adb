@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.14
+--  Version: 0.16
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -137,9 +137,9 @@ package body Skip_List is
    end Current_Level;
 
    -- Search for a key and return its value
-   function Search (List  : Skip_List_Type;
-                   Key   : Element_Type;
-                   Value : out Element_Type) return Boolean is
+   function Search (List   : Skip_List_Type;
+                   Key    : Element_Type;
+                   Value  : out Element_Type) return Boolean is
       Current : Node_Access := List.Head;
       Lvl : Level_Type := List.Current_Level;
    begin
@@ -147,14 +147,14 @@ package body Skip_List is
       while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the search key
          while Current.Forward(Lvl) /= null and then 
-               Current.Forward(Lvl).Key < Key loop
+               Current.Forward(Lvl).all.Key < Key loop
             Current := Current.Forward(Lvl);
          end loop;
           
          -- If we found the key at this level, return it
          if Current.Forward(Lvl) /= null and then 
-            Current.Forward(Lvl).Key = Key then
-            Value := Current.Forward(Lvl).Value;
+            Current.Forward(Lvl).all.Key = Key then
+            Value := Current.Forward(Lvl).all.Value;
             return True;
          end if;
           
@@ -167,8 +167,8 @@ package body Skip_List is
    end Search;
 
    -- Check if a key exists in the skip list
-   function Contains (List : Skip_List_Type;
-                     Key  : Element_Type) return Boolean is
+   function Contains (List  : Skip_List_Type;
+                     Key   : Element_Type) return Boolean is
       Value : Element_Type;
    begin
       return Search(List, Key, Value);
@@ -181,7 +181,7 @@ package body Skip_List is
       if List.Head.Forward(0) = null then
          raise Empty_List_Error;
       end if;
-      return List.Head.Forward(0).Key;
+      return List.Head.Forward(0).all.Key;
    end Min_Key;
 
    -- Get the maximum key in the skip list
@@ -197,13 +197,13 @@ package body Skip_List is
          raise Empty_List_Error;
       end if;
       
-      return Current.Key;
+      return Current.all.Key;
    end Max_Key;
 
    -- Insert a key-value pair into the skip list
-   function Insert (List : in out Skip_List_Type; 
-                    Key   : Element_Type;
-                    Value : Element_Type) return Boolean is
+   function Insert (List  : in out Skip_List_Type; 
+                    Key    : Element_Type;
+                    Value  : Element_Type) return Boolean is
       -- Array to store the update positions for each level
       type Update_Array is array (Level_Type) of Node_Access;
       Update : Update_Array;
@@ -228,7 +228,7 @@ package body Skip_List is
       while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the insertion key
          while Current.Forward(Lvl) /= null and then 
-               Current.Forward(Lvl).Key < Key loop
+               Current.Forward(Lvl).all.Key < Key loop
             Current := Current.Forward(Lvl);
          end loop;
           
@@ -261,14 +261,14 @@ package body Skip_List is
       end loop;
       
       -- Increment the count
-      List.Count := List.Count + 1;
+      List.Count := Ada.Containers.Count_Type'Succ(List.Count);
       
       return True;
    end Insert;
 
    -- Delete a key from the skip list
    function Delete (List : in out Skip_List_Type;
-                   Key  : Element_Type) return Boolean is
+                   Key   : Element_Type) return Boolean is
       -- Array to store the update positions for each level
       type Update_Array is array (Level_Type) of Node_Access;
       Update : Update_Array;
@@ -287,7 +287,7 @@ package body Skip_List is
       while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the deletion key
          while Current.Forward(Lvl) /= null and then 
-               Current.Forward(Lvl).Key < Key loop
+               Current.Forward(Lvl).all.Key < Key loop
             Current := Current.Forward(Lvl);
          end loop;
           
@@ -299,7 +299,7 @@ package body Skip_List is
       end loop;
       
       -- Check if the node exists at level 0
-      if Update(0).Forward(0) = null or else Update(0).Forward(0).Key /= Key then
+      if Update(0).Forward(0) = null or else Update(0).Forward(0).all.Key /= Key then
          return False;
       end if;
       
@@ -323,7 +323,7 @@ package body Skip_List is
       end loop;
       
       -- Decrement the count
-      List.Count := List.Count - 1;
+      List.Count := Ada.Containers.Count_Type'Pred(List.Count);
       
       return True;
    end Delete;
@@ -337,13 +337,13 @@ package body Skip_List is
    -- Get the key at the current cursor position
    function Key (Position : Cursor) return Element_Type is
    begin
-      return Position.Node_Ptr.Key;
+      return Position.Node_Ptr.all.Key;
    end Key;
 
    -- Get the value at the current cursor position
    function Value (Position : Cursor) return Element_Type is
    begin
-      return Position.Node_Ptr.Value;
+      return Position.Node_Ptr.all.Value;
    end Value;
 
    -- Move cursor to the first element

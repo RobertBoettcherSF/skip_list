@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.14
+--  Version: 0.16
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -51,24 +51,24 @@ package Skip_List is
 
    -- Insert a key-value pair into the skip list
    -- Returns True if insertion was successful, False if key already exists
-   function Insert (List : in out Skip_List_Type; 
-                   Key   : Element_Type;
-                   Value : Element_Type) return Boolean;
+   function Insert (List  : in out Skip_List_Type; 
+                   Key    : Element_Type;
+                   Value  : Element_Type) return Boolean;
 
    -- Search for a key and return its value
    -- Returns True if found, False otherwise
-   function Search (List  : Skip_List_Type;
-                   Key   : Element_Type;
-                   Value : out Element_Type) return Boolean;
+   function Search (List   : Skip_List_Type;
+                   Key    : Element_Type;
+                   Value  : out Element_Type) return Boolean;
 
    -- Delete a key from the skip list
    -- Returns True if deletion was successful, False if key not found
    function Delete (List : in out Skip_List_Type;
-                   Key  : Element_Type) return Boolean;
+                   Key   : Element_Type) return Boolean;
 
    -- Check if a key exists in the skip list
-   function Contains (List : Skip_List_Type;
-                     Key  : Element_Type) return Boolean;
+   function Contains (List  : Skip_List_Type;
+                     Key   : Element_Type) return Boolean;
 
    -- Get the minimum key in the skip list
    function Min_Key (List : Skip_List_Type) return Element_Type;
