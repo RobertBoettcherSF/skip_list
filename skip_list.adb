@@ -7,12 +7,12 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.09
+--  Version: 0.11
 --  Author: Vibe Code Agent
 --  Date: 2024
 
 package body Skip_List with
-   SPARK_Mode => On
+   SPARK_Mode
 is
 
    -- Local package for random number generation
@@ -91,7 +91,6 @@ is
          Next_Node := Current.Forward(0);
          Current.Forward(0) := Next_Node.Forward(0);
          -- Deallocate the node
-         -- In SPARK, we use a simple approach for verification
          Free (Next_Node);
       end loop;
       

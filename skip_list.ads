@@ -6,12 +6,12 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.10
+--  Version: 0.11
 --  Author: Vibe Code Agent
 --  Date: 2024
 
 package Skip_List with
-   SPARK_Mode => On
+   SPARK_Mode
 is
 
    -- Maximum level for the skip list (affects memory usage and performance)
@@ -74,12 +74,10 @@ is
                      Key  : Element_Type) return Boolean;
 
    -- Get the minimum key in the skip list
-   function Min_Key (List : Skip_List_Type) return Element_Type
-     with Pre => not Is_Empty (List);
+   function Min_Key (List : Skip_List_Type) return Element_Type;
 
    -- Get the maximum key in the skip list
-   function Max_Key (List : Skip_List_Type) return Element_Type
-     with Pre => not Is_Empty (List);
+   function Max_Key (List : Skip_List_Type) return Element_Type;
 
    -- Iterate through all elements in sorted order
    -- This is a forward iterator
@@ -92,19 +90,16 @@ is
    function Has_Element (Position : Cursor) return Boolean;
 
    -- Get the key at the current cursor position
-   function Key (Position : Cursor) return Element_Type
-     with Pre => Has_Element (Position);
+   function Key (Position : Cursor) return Element_Type;
 
    -- Get the value at the current cursor position
-   function Value (Position : Cursor) return Element_Type
-     with Pre => Has_Element (Position);
+   function Value (Position : Cursor) return Element_Type;
 
    -- Move cursor to the first element
    function First (List : Skip_List_Type) return Cursor;
 
    -- Move cursor to the next element
-   function Next (List : Skip_List_Type; Position : Cursor) return Cursor
-     with Pre => Has_Element (Position);
+   function Next (List : Skip_List_Type; Position : Cursor) return Cursor;
 
    -- Set the random seed for deterministic probabilistic behavior
    -- This is crucial for verification and testing
