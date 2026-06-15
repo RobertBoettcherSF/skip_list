@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.06
+--  Version: 0.07
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -116,8 +116,9 @@ is
 
    -- Check if the skip list is empty
    function Is_Empty (List : Skip_List_Type) return Boolean is
+      use Ada.Containers;
    begin
-      return List.Count = Ada.Containers.Count_Type(0);
+      return List.Count = Count_Type(0);
    end Is_Empty;
 
    -- Get the number of elements in the skip list
