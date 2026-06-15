@@ -7,11 +7,9 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.08
+--  Version: 0.09
 --  Author: Vibe Code Agent
 --  Date: 2024
-
-with Ada.Containers;
 
 package body Skip_List with
    SPARK_Mode => On
@@ -116,13 +114,12 @@ is
 
    -- Check if the skip list is empty
    function Is_Empty (List : Skip_List_Type) return Boolean is
-      use Ada.Containers;
    begin
-      return List.Count = Count_Type(0);
+      return List.Count = 0;
    end Is_Empty;
 
    -- Get the number of elements in the skip list
-   function Length (List : Skip_List_Type) return Ada.Containers.Count_Type is
+   function Length (List : Skip_List_Type) return Natural is
    begin
       return List.Count;
    end Length;
@@ -277,7 +274,7 @@ is
       end loop;
       
       -- Increment the count
-      List.Count := List.Count + Ada.Containers.Count_Type(1);
+      List.Count := List.Count + 1;
       
       Success := True;
    end Insert;
@@ -341,7 +338,7 @@ is
       end loop;
       
       -- Decrement the count
-      List.Count := List.Count - Ada.Containers.Count_Type(1);
+      List.Count := List.Count - 1;
       
       Success := True;
    end Delete;

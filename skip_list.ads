@@ -6,11 +6,9 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.08
+--  Version: 0.09
 --  Author: Vibe Code Agent
 --  Date: 2024
-
-with Ada.Containers;
 
 package Skip_List with
    SPARK_Mode => On
@@ -30,9 +28,11 @@ is
    -- Type for node levels (0 to Max_Level)
    type Level_Type is range 0 .. Max_Level;
 
-   -- Forward pointer array type
+   -- Node type for the skip list
    type Node;
    type Node_Access is access Node;
+
+   -- Forward pointer array type
    type Forward_Array is array (Level_Type) of Node_Access;
 
    -- Skip List type
@@ -57,7 +57,7 @@ is
    function Is_Empty (List : Skip_List_Type) return Boolean;
 
    -- Get the number of elements in the skip list
-   function Length (List : Skip_List_Type) return Ada.Containers.Count_Type;
+   function Length (List : Skip_List_Type) return Natural;
 
    -- Insert a key-value pair into the skip list
    -- Returns True if insertion was successful, False if key already exists
@@ -136,7 +136,7 @@ private
    type Skip_List_Type is tagged record
       Head : Node_Access;
       Current_Level : Level_Type := 0;
-      Count : Ada.Containers.Count_Type := 0;
+      Count : Natural := 0;
    end record;
 
    -- Cursor for iteration
