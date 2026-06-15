@@ -1,0 +1,128 @@
+--  skip_list.gpr
+--  
+--  GNAT Project File for Skip List SPARK implementation
+--  
+--  This project file configures the Skip List implementation for
+--  compilation with SPARK and GNAT. It includes settings for:
+--  - SPARK verification
+--  - Optimization levels
+--  - Runtime checks
+--  - Source directories
+--  
+--  Author: Vibe Code Agent
+--  Date: 2024
+
+project Skip_List is
+
+   -- Project description
+   for Project_Description use "Skip List - Probabilistic alternative to trees";
+   for Project_Reference_Directory use ".";
+
+   -- Source directories
+   for Source_Dirs use ("src", ".");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Library_Dir use "lib";
+
+   -- Main source file
+   for Main use ("skip_list.adb");
+
+   -- Language settings
+   for Language use ("Ada");
+
+   -- SPARK settings
+   for SPARK_Mode use "On";
+
+   -- Compiler settings
+   package Compiler is
+      for Default_Switches ("Ada") use (
+         "-gnatN",       -- No assert pragma suppression
+         "-gnatp",       -- Suppress info messages
+         "-gnata",       -- Enable assertions
+         "-gnatV",       -- Enable validity checks
+         "-gnatX",       -- Enable SPARK mode
+         "-gnatk",       -- Check all files
+         "-gnatf",       -- Full error messages
+         "-gnatC",       -- Enable contract checking
+         "-gnatw.e",     -- Warn on unreachable code
+         "-gnatw.s",     -- Warn on suspicious conversions
+         "-gnatw.x",     -- Warn on unused variables
+         "-O2"          -- Optimization level 2
+      );
+   end Compiler;
+
+   -- Linker settings
+   package Linker is
+      for Default_Switches ("Ada") use ("-static");
+   end Linker;
+
+   -- Builder settings
+   package Builder is
+      for Default_Switches ("Ada") use ("-j0"); -- Single-threaded build
+   end Builder;
+
+   -- SPARK specific settings
+   package SPARK is
+      -- Enable flow analysis
+      for Flow_Analysis use "All";
+      
+      -- Enable proof
+      for Proof use "On";
+      
+      -- Proof level
+      for Proof_Level use "Full";
+      
+      -- Enable contract checking
+      for Contract_Checking use "On";
+      
+      -- Enable runtime checks
+      for Runtime_Checks use "On";
+   end SPARK;
+
+   -- Target configuration
+   for Target use "x86_64-linux-gnu";
+
+   -- Runtime library
+   for Runtime ("Ada") use "gnat";
+
+   -- Enable SPARK verification for all source files
+   for Source_Files use ("skip_list.ads", "skip_list.adb");
+
+   -- SPARK verification settings
+   package Verification is
+      -- Verify all contracts
+      for Verify_Contracts use "All";
+      
+      -- Verify all assertions
+      for Verify_Assertions use "All";
+      
+      -- Verify all preconditions
+      for Verify_Preconditions use "All";
+      
+      -- Verify all postconditions
+      for Verify_Postconditions use "All";
+      
+      -- Maximum verification depth
+      for Max_Depth use 100;
+      
+      -- Timeout for verification (in seconds)
+      for Timeout use 300;
+   end Verification;
+
+   -- Test configuration
+   package Tests is
+      for Test_Dir use "tests";
+      for Test_Switches ("Ada") use (
+         "-gnata",       -- Enable assertions
+         "-gnatV",       -- Enable validity checks
+         "-gnatC"        -- Enable contract checking
+      );
+   end Tests;
+
+   -- Documentation configuration
+   package Documentation is
+      for Doc_Dir use "docs";
+      for Doc_Switches ("Ada") use ("-gnatd");
+   end Documentation;
+
+end Skip_List;
