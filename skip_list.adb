@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.19
+--  Version: 0.20
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -73,9 +73,6 @@ package body Skip_List is
       end Random_Level;
    end Random_Generator;
 
-   -- Global random generator instance
-   Gen : Random_Generator.Generator;
-
    -- Memory deallocation for nodes
    -- Note: This is not SPARK compatible, so we mark procedures using it as SPARK_Mode => Off
    procedure Free is new Ada.Unchecked_Deallocation (Node, Node_Access);
@@ -83,6 +80,8 @@ package body Skip_List is
    -- Initialize the skip list
    procedure Initialize (List : out Skip_List_Type) is
       pragma SPARK_Mode (Off);
+      -- Global random generator instance (must be in SPARK_Mode Off due to Float usage)
+      Gen : Random_Generator.Generator;
    begin
       List.Head := new Node'(Key => Element_Type'First, 
                             Value => Element_Type'First,
@@ -128,12 +127,17 @@ package body Skip_List is
 
    -- Generate a random level for a new node
    function Generate_Level return Level_Type is
+      pragma SPARK_Mode (Off);
+      Gen : Random_Generator.Generator;
    begin
+      Random_Generator.Initialize(Gen, 42); -- Default seed for deterministic behavior
       return Random_Generator.Random_Level(Gen);
    end Generate_Level;
 
    -- Set the random seed for deterministic probabilistic behavior
    procedure Set_Random_Seed (Seed : Integer) is
+      pragma SPARK_Mode (Off);
+      Gen : Random_Generator.Generator;
    begin
       Random_Generator.Initialize(Gen, Seed);
    end Set_Random_Seed;
@@ -197,13 +201,15 @@ package body Skip_List is
    -- Get the maximum key in the skip list
    function Max_Key (List : Skip_List_Type) return Element_Type is
       Current : Node_Access := List.Head;
+      Moved : Boolean := False;
    begin
       -- Traverse level 0 to find the last element
       while Current.Forward(0) /= null loop
          Current := Current.Forward(0);
+         Moved := True;
       end loop;
       
-      if Current = List.Head then
+      if not Moved then
          raise Empty_List_Error;
       end if;
       

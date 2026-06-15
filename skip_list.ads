@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.19
+--  Version: 0.20
 --  Author: Vibe Code Agent
 --  Date: 2024
 
