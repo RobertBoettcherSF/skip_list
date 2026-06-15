@@ -45,28 +45,28 @@ begin
    -- Test inserting elements
    Ada.Text_IO.Put_Line("\n--- Inserting elements ---");
    
-   Success := Insert(List, 10, 100);
+   Insert(List, 10, 100, Success);
    if Success then
       Ada.Text_IO.Put_Line("✓ Inserted (10, 100).");
    else
       Ada.Text_IO.Put_Line("✗ Failed to insert (10, 100).");
    end if;
    
-   Success := Insert(List, 20, 200);
+   Insert(List, 20, 200, Success);
    if Success then
       Ada.Text_IO.Put_Line("✓ Inserted (20, 200).");
    else
       Ada.Text_IO.Put_Line("✗ Failed to insert (20, 200).");
    end if;
    
-   Success := Insert(List, 5, 50);
+   Insert(List, 5, 50, Success);
    if Success then
       Ada.Text_IO.Put_Line("✓ Inserted (5, 50).");
    else
       Ada.Text_IO.Put_Line("✗ Failed to insert (5, 50).");
    end if;
    
-   Success := Insert(List, 15, 150);
+   Insert(List, 15, 150, Success);
    if Success then
       Ada.Text_IO.Put_Line("✓ Inserted (15, 150).");
    else
@@ -74,7 +74,7 @@ begin
    end if;
    
    -- Test duplicate insertion
-   Success := Insert(List, 10, 999);
+   Insert(List, 10, 999, Success);
    if not Success then
       Ada.Text_IO.Put_Line("✓ Duplicate insertion rejected (correct).");
    else
@@ -111,13 +111,15 @@ begin
    
    -- Test Search
    Ada.Text_IO.Put_Line("\n--- Testing Search ---");
-   if Search(List, 10, Value) and Value = 100 then
+   Search(List, 10, Value, Success);
+   if Success and Value = 100 then
       Ada.Text_IO.Put_Line("✓ Found (10, 100) (correct).");
    else
       Ada.Text_IO.Put_Line("✗ Failed to find (10, 100) (incorrect).");
    end if;
    
-   if Search(List, 20, Value) and Value = 200 then
+   Search(List, 20, Value, Success);
+   if Success and Value = 200 then
       Ada.Text_IO.Put_Line("✓ Found (20, 200) (correct).");
    else
       Ada.Text_IO.Put_Line("✗ Failed to find (20, 200) (incorrect).");
@@ -164,7 +166,7 @@ begin
    
    -- Test Delete
    Ada.Text_IO.Put_Line("\n--- Testing Delete ---");
-   Success := Delete(List, 15);
+   Delete(List, 15, Success);
    if Success then
       Ada.Text_IO.Put_Line("✓ Deleted key 15.");
    else
@@ -184,7 +186,7 @@ begin
    end if;
    
    -- Test deleting non-existent key
-   Success := Delete(List, 99);
+   Delete(List, 99, Success);
    if not Success then
       Ada.Text_IO.Put_Line("✓ Delete of non-existent key 99 rejected (correct).");
    else

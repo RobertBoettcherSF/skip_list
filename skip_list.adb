@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.18
+--  Version: 0.19
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -211,9 +211,10 @@ package body Skip_List is
    end Max_Key;
 
    -- Insert a key-value pair into the skip list
-   function Insert (List  : in out Skip_List_Type; 
+   procedure Insert (List  : in out Skip_List_Type; 
                     Key    : Element_Type;
-                    Value  : Element_Type) return Boolean is
+                    Value  : Element_Type;
+                    Success : out Boolean) is
       pragma SPARK_Mode (Off);
       -- Array to store the update positions for each level
       type Update_Array is array (Level_Type) of Node_Access;
@@ -227,7 +228,8 @@ package body Skip_List is
    begin
       -- Check for duplicate key first
       if Contains(List, Key) then
-         return False;
+         Success := False;
+         return;
       end if;
       
       -- Initialize update array
@@ -274,12 +276,13 @@ package body Skip_List is
       -- Increment the count
       List.Count := Ada.Containers.Count_Type'Succ(List.Count);
       
-      return True;
+      Success := True;
    end Insert;
 
    -- Delete a key from the skip list
-   function Delete (List : in out Skip_List_Type;
-                   Key   : Element_Type) return Boolean is
+   procedure Delete (List : in out Skip_List_Type;
+                    Key   : Element_Type;
+                    Success : out Boolean) is
       pragma SPARK_Mode (Off);
       -- Array to store the update positions for each level
       type Update_Array is array (Level_Type) of Node_Access;
@@ -312,7 +315,8 @@ package body Skip_List is
       
       -- Check if the node exists at level 0
       if Update(0).Forward(0) = null or else Update(0).Forward(0).all.Key /= Key then
-         return False;
+         Success := False;
+         return;
       end if;
       
       Node_To_Delete := Update(0).Forward(0);
@@ -337,7 +341,7 @@ package body Skip_List is
       -- Decrement the count
       List.Count := Ada.Containers.Count_Type'Pred(List.Count);
       
-      return True;
+      Success := True;
    end Delete;
 
    -- Check if cursor points to an element

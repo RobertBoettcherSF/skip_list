@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.18
+--  Version: 0.19
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -52,10 +52,11 @@ package Skip_List is
    function Length (List : Skip_List_Type) return Ada.Containers.Count_Type;
 
    -- Insert a key-value pair into the skip list
-   -- Returns True if insertion was successful, False if key already exists
-   function Insert (List  : in out Skip_List_Type; 
-                   Key    : Element_Type;
-                   Value  : Element_Type) return Boolean;
+   -- Success indicates if insertion was successful (False if key already exists)
+   procedure Insert (List  : in out Skip_List_Type; 
+                    Key    : Element_Type;
+                    Value  : Element_Type;
+                    Success : out Boolean);
 
    -- Search for a key and return its value
    -- Returns True if found, False otherwise
@@ -65,9 +66,10 @@ package Skip_List is
                     Found  : out Boolean);
 
    -- Delete a key from the skip list
-   -- Returns True if deletion was successful, False if key not found
-   function Delete (List : in out Skip_List_Type;
-                   Key   : Element_Type) return Boolean;
+   -- Success indicates if deletion was successful (False if key not found)
+   procedure Delete (List : in out Skip_List_Type;
+                    Key   : Element_Type;
+                    Success : out Boolean);
 
    -- Check if a key exists in the skip list
    function Contains (List  : Skip_List_Type;
