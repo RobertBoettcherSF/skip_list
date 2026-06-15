@@ -9,6 +9,7 @@
 --  - Runtime checks
 --  - Source directories
 --  
+--  Version: 0.01
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -103,10 +104,10 @@ project Skip_List is
       for Verify_Postconditions use "All";
       
       -- Maximum verification depth
-      for Max_Depth use 100;
+      for Max_Depth use "100";
       
       -- Timeout for verification (in seconds)
-      for Timeout use 300;
+      for Timeout use "300";
    end Verification;
 
    -- Test configuration
