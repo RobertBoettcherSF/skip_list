@@ -7,11 +7,10 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.13
+--  Version: 0.14
 --  Author: Vibe Code Agent
 --  Date: 2024
 
-with Ada.Containers;
 with Ada.Unchecked_Deallocation;
 
 package body Skip_List is
@@ -62,7 +61,7 @@ package body Skip_List is
          -- This gives us the geometric distribution characteristic of skip lists
          loop
             Rand := Random(Gen);
-            exit when Rand >= P or Level = Max_Level - 1;
+            exit when Rand >= P or Level = Level_Type(Max_Level - 1);
             Level := Level + 1;
          end loop;
          return Level;
@@ -74,9 +73,6 @@ package body Skip_List is
 
    -- Memory deallocation for nodes
    procedure Free is new Ada.Unchecked_Deallocation (Node, Node_Access);
-
-   -- Memory deallocation for forward arrays
-   procedure Free_Array is new Ada.Unchecked_Deallocation (Forward_Array, access Forward_Array);
 
    -- Initialize the skip list
    procedure Initialize (List : out Skip_List_Type) is
@@ -111,8 +107,9 @@ package body Skip_List is
 
    -- Check if the skip list is empty
    function Is_Empty (List : Skip_List_Type) return Boolean is
+      use Ada.Containers;
    begin
-      return List.Count = 0;
+      return List.Count = Count_Type(0);
    end Is_Empty;
 
    -- Get the number of elements in the skip list
@@ -144,25 +141,25 @@ package body Skip_List is
                    Key   : Element_Type;
                    Value : out Element_Type) return Boolean is
       Current : Node_Access := List.Head;
-      Level : Level_Type := List.Current_Level;
+      Lvl : Level_Type := List.Current_Level;
    begin
       -- Start from the highest level and work down
-      while Level >= 0 loop
+      while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the search key
-         while Current.Forward(Level) /= null and then 
-               Current.Forward(Level).Key < Key loop
-            Current := Current.Forward(Level);
+         while Current.Forward(Lvl) /= null and then 
+               Current.Forward(Lvl).Key < Key loop
+            Current := Current.Forward(Lvl);
          end loop;
           
          -- If we found the key at this level, return it
-         if Current.Forward(Level) /= null and then 
-            Current.Forward(Level).Key = Key then
-            Value := Current.Forward(Level).Value;
+         if Current.Forward(Lvl) /= null and then 
+            Current.Forward(Lvl).Key = Key then
+            Value := Current.Forward(Lvl).Value;
             return True;
          end if;
           
          -- Move down to the next level
-         Level := Level - 1;
+         Lvl := Lvl - 1;
       end loop;
       
       -- Key not found
@@ -212,7 +209,7 @@ package body Skip_List is
       Update : Update_Array;
       
       Current : Node_Access := List.Head;
-      Level : Level_Type := List.Current_Level;
+      Lvl : Level_Type := List.Current_Level;
       New_Level : Level_Type;
       New_Node : Node_Access;
       
@@ -228,18 +225,18 @@ package body Skip_List is
       end loop;
       
       -- Find the insertion positions at each level
-      while Level >= 0 loop
+      while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the insertion key
-         while Current.Forward(Level) /= null and then 
-               Current.Forward(Level).Key < Key loop
-            Current := Current.Forward(Level);
+         while Current.Forward(Lvl) /= null and then 
+               Current.Forward(Lvl).Key < Key loop
+            Current := Current.Forward(Lvl);
          end loop;
           
          -- Store the update position for this level
-         Update(Level) := Current;
+         Update(Lvl) := Current;
           
          -- Move down to the next level
-         Level := Level - 1;
+         Lvl := Lvl - 1;
       end loop;
       
       -- Generate a random level for the new node
@@ -277,7 +274,7 @@ package body Skip_List is
       Update : Update_Array;
       
       Current : Node_Access := List.Head;
-      Level : Level_Type := List.Current_Level;
+      Lvl : Level_Type := List.Current_Level;
       Node_To_Delete : Node_Access;
       
    begin
@@ -287,18 +284,18 @@ package body Skip_List is
       end loop;
       
       -- Find the node to delete at each level
-      while Level >= 0 loop
+      while Lvl >= 0 loop
          -- Move forward while the next node's key is less than the deletion key
-         while Current.Forward(Level) /= null and then 
-               Current.Forward(Level).Key < Key loop
-            Current := Current.Forward(Level);
+         while Current.Forward(Lvl) /= null and then 
+               Current.Forward(Lvl).Key < Key loop
+            Current := Current.Forward(Lvl);
          end loop;
           
          -- Store the update position for this level
-         Update(Level) := Current;
+         Update(Lvl) := Current;
           
          -- Move down to the next level
-         Level := Level - 1;
+         Lvl := Lvl - 1;
       end loop;
       
       -- Check if the node exists at level 0
