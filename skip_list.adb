@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.07
+--  Version: 0.08
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -277,7 +277,7 @@ is
       end loop;
       
       -- Increment the count
-      List.Count := List.Count + 1;
+      List.Count := List.Count + Ada.Containers.Count_Type(1);
       
       Success := True;
    end Insert;
@@ -341,7 +341,7 @@ is
       end loop;
       
       -- Decrement the count
-      List.Count := List.Count - 1;
+      List.Count := List.Count - Ada.Containers.Count_Type(1);
       
       Success := True;
    end Delete;
