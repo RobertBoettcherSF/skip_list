@@ -1,14 +1,16 @@
 --  skip_list.ads
 --  
---  Ada specification for Skip List - Probabilistic alternative to trees
+--  Ada SPARK specification for Skip List - Probabilistic alternative to trees
 --  
 --  Skip Lists provide expected O(log n) search, insert, and delete operations
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.16
+--  Version: 0.18
 --  Author: Vibe Code Agent
 --  Date: 2024
+
+pragma SPARK_Mode (On);
 
 with Ada.Containers;
 
@@ -57,9 +59,10 @@ package Skip_List is
 
    -- Search for a key and return its value
    -- Returns True if found, False otherwise
-   function Search (List   : Skip_List_Type;
-                   Key    : Element_Type;
-                   Value  : out Element_Type) return Boolean;
+   procedure Search (List   : Skip_List_Type;
+                    Key    : Element_Type;
+                    Value  : out Element_Type;
+                    Found  : out Boolean);
 
    -- Delete a key from the skip list
    -- Returns True if deletion was successful, False if key not found
