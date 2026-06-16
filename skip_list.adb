@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.24
+--  Version: 0.25
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -179,13 +179,14 @@ package body Skip_List is
    end Search;
 
    -- Check if a key exists in the skip list
-   function Contains (List  : in out Skip_List_Type;
-                     Key   : Element_Type) return Boolean is
+   procedure Contains (List  : in out Skip_List_Type;
+                      Key   : Element_Type;
+                      Result : out Boolean) is
       Value : Element_Type;
       Found : Boolean;
    begin
       Search(List, Key, Value, Found);
-      return Found;
+      Result := Found;
    end Contains;
 
    -- Get the minimum key in the skip list

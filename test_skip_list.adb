@@ -97,13 +97,15 @@ begin
    
    -- Test Contains
    Ada.Text_IO.Put_Line("\n--- Testing Contains ---");
-   if Contains(List, 10) then
+   Contains(List, 10, Success);
+   if Success then
       Ada.Text_IO.Put_Line("✓ Contains 10 (correct).");
    else
       Ada.Text_IO.Put_Line("✗ Does not contain 10 (incorrect).");
    end if;
    
-   if Contains(List, 99) then
+   Contains(List, 99, Success);
+   if Success then
       Ada.Text_IO.Put_Line("✗ Contains 99 (incorrect).");
    else
       Ada.Text_IO.Put_Line("✓ Does not contain 99 (correct).");
@@ -180,7 +182,8 @@ begin
       Ada.Text_IO.Put_Line("✗ Length is " & Length(List)'Image & " after deletion (incorrect).");
    end if;
    
-   if not Contains(List, 15) then
+   Contains(List, 15, Success);
+   if not Success then
       Ada.Text_IO.Put_Line("✓ Key 15 no longer in list (correct).");
    else
       Ada.Text_IO.Put_Line("✗ Key 15 still in list (incorrect).");
