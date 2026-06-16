@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.25
+--  Version: 0.26
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -233,9 +233,11 @@ package body Skip_List is
       New_Level : Level_Type;
       New_Node : Node_Access;
       
+      Found_Dup : Boolean;
    begin
       -- Check for duplicate key first
-      if Contains(List, Key) then
+      Contains(List, Key, Found_Dup);
+      if Found_Dup then
          Success := False;
          return;
       end if;
