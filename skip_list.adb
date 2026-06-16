@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.22
+--  Version: 0.23
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -149,7 +149,7 @@ package body Skip_List is
    end Current_Level;
 
    -- Search for a key and return its value
-   procedure Search (List   : in out Skip_List_Type;
+   procedure Search (List   : Skip_List_Type;
                     Key    : Element_Type;
                     Value  : out Element_Type;
                     Found  : out Boolean) is
