@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.23
+--  Version: 0.24
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -149,7 +149,7 @@ package body Skip_List is
    end Current_Level;
 
    -- Search for a key and return its value
-   procedure Search (List   : Skip_List_Type;
+   procedure Search (List   : in out Skip_List_Type;
                     Key    : Element_Type;
                     Value  : out Element_Type;
                     Found  : out Boolean) is
@@ -179,7 +179,7 @@ package body Skip_List is
    end Search;
 
    -- Check if a key exists in the skip list
-   function Contains (List  : Skip_List_Type;
+   function Contains (List  : in out Skip_List_Type;
                      Key   : Element_Type) return Boolean is
       Value : Element_Type;
       Found : Boolean;
@@ -199,7 +199,7 @@ package body Skip_List is
    end Min_Key;
 
    -- Get the maximum key in the skip list
-   procedure Max_Key (List : in out Skip_List_Type;
+   procedure Max_Key (List : Skip_List_Type;
                      Result : out Element_Type) is
       Current : Node_Access := List.Head;
       Moved : Boolean := False;
@@ -370,7 +370,7 @@ package body Skip_List is
    end Value;
 
    -- Move cursor to the first element
-   procedure First (List : in out Skip_List_Type;
+   procedure First (List : Skip_List_Type;
                    Result : out Cursor) is
    begin
       if List.Head.Forward(0) = null then
@@ -381,8 +381,8 @@ package body Skip_List is
    end First;
 
    -- Move cursor to the next element
-   procedure Next (List : in out Skip_List_Type;
-                  Position : in out Cursor;
+   procedure Next (List : Skip_List_Type;
+                  Position : Cursor;
                   Result : out Cursor) is
    begin
       if Position.Node_Ptr.Forward(0) = null then
