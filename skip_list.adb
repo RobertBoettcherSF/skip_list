@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.21
+--  Version: 0.22
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -162,7 +162,6 @@ package body Skip_List is
          -- Move forward while the next node's key is less than the search key
          while Current.Forward(Lev) /= null and then 
                Current.Forward(Lev).all.Key < Key loop
-            pragma Loop_Variant (Increases => Current);
             Current := Current.Forward(Lev);
          end loop;
           
@@ -200,13 +199,13 @@ package body Skip_List is
    end Min_Key;
 
    -- Get the maximum key in the skip list
-   function Max_Key (List : in out Skip_List_Type) return Element_Type is
+   procedure Max_Key (List : in out Skip_List_Type;
+                     Result : out Element_Type) is
       Current : Node_Access := List.Head;
       Moved : Boolean := False;
    begin
       -- Traverse level 0 to find the last element
       while Current.Forward(0) /= null loop
-         pragma Loop_Variant (Increases => Current);
          Current := Current.Forward(0);
          Moved := True;
       end loop;
@@ -215,7 +214,7 @@ package body Skip_List is
          raise Empty_List_Error;
       end if;
       
-      return Current.all.Key;
+      Result := Current.all.Key;
    end Max_Key;
 
    -- Insert a key-value pair into the skip list
@@ -371,21 +370,26 @@ package body Skip_List is
    end Value;
 
    -- Move cursor to the first element
-   function First (List : in out Skip_List_Type) return Cursor is
+   procedure First (List : in out Skip_List_Type;
+                   Result : out Cursor) is
    begin
       if List.Head.Forward(0) = null then
-         return (Node_Ptr => null);
+         Result := (Node_Ptr => null);
+      else
+         Result := (Node_Ptr => List.Head.Forward(0));
       end if;
-      return (Node_Ptr => List.Head.Forward(0));
    end First;
 
    -- Move cursor to the next element
-   function Next (List : in out Skip_List_Type; Position : in out Cursor) return Cursor is
+   procedure Next (List : in out Skip_List_Type;
+                  Position : in out Cursor;
+                  Result : out Cursor) is
    begin
       if Position.Node_Ptr.Forward(0) = null then
-         return (Node_Ptr => null);
+         Result := (Node_Ptr => null);
+      else
+         Result := (Node_Ptr => Position.Node_Ptr.Forward(0));
       end if;
-      return (Node_Ptr => Position.Node_Ptr.Forward(0));
    end Next;
 
 begin

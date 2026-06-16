@@ -133,15 +133,16 @@ begin
       Ada.Text_IO.Put_Line("✗ Min_Key is " & Min_Key(List)'Image & " (incorrect).");
    end if;
    
-   if Max_Key(List) = 20 then
+   Max_Key(List, Value);
+   if Value = 20 then
       Ada.Text_IO.Put_Line("✓ Max_Key is 20 (correct).");
    else
-      Ada.Text_IO.Put_Line("✗ Max_Key is " & Max_Key(List)'Image & " (incorrect).");
+      Ada.Text_IO.Put_Line("✗ Max_Key is " & Value'Image & " (incorrect).");
    end if;
    
    -- Test Iterator
    Ada.Text_IO.Put_Line("\n--- Testing Iterator ---");
-   Cursor_Pos := First(List);
+   First(List, Cursor_Pos);
    if Has_Element(Cursor_Pos) then
       Ada.Text_IO.Put_Line("✓ First element exists.");
       Ada.Text_IO.Put("  Key: ");
@@ -154,14 +155,14 @@ begin
    
    -- Iterate through all elements
    Ada.Text_IO.Put_Line("  All elements in order:");
-   Cursor_Pos := First(List);
+   First(List, Cursor_Pos);
    while Has_Element(Cursor_Pos) loop
       Ada.Text_IO.Put("    (");
       Ada.Text_IO.Put(Key(Cursor_Pos)'Image);
       Ada.Text_IO.Put(", ");
       Ada.Text_IO.Put(Value(Cursor_Pos)'Image);
       Ada.Text_IO.Put_Line(")");
-      Cursor_Pos := Next(List, Cursor_Pos);
+      Next(List, Cursor_Pos, Cursor_Pos);
    end loop;
    
    -- Test Delete

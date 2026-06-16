@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.21
+--  Version: 0.22
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -63,9 +63,7 @@ package Skip_List is
    procedure Search (List   : in out Skip_List_Type;
                     Key    : Element_Type;
                     Value  : out Element_Type;
-                    Found  : out Boolean)
-     with Global => (In_Out => List),
-          Always_Terminates => True;
+                    Found  : out Boolean);
 
    -- Delete a key from the skip list
    -- Success indicates if deletion was successful (False if key not found)
@@ -81,9 +79,9 @@ package Skip_List is
    function Min_Key (List : Skip_List_Type) return Element_Type;
 
    -- Get the maximum key in the skip list
-   function Max_Key (List : in out Skip_List_Type) return Element_Type
-     with Global => (In_Out => List),
-          Always_Terminates => True;
+   procedure Max_Key (List : in out Skip_List_Type;
+                     Result : out Element_Type)
+     with Global => (In_Out => List);
 
    -- Iterate through all elements in sorted order
    -- This is a forward iterator
@@ -102,14 +100,15 @@ package Skip_List is
    function Value (Position : Cursor) return Element_Type;
 
    -- Move cursor to the first element
-   function First (List : in out Skip_List_Type) return Cursor
-     with Global => (In_Out => List),
-          Always_Terminates => True;
+   procedure First (List : in out Skip_List_Type;
+                   Result : out Cursor)
+     with Global => (In_Out => List);
 
    -- Move cursor to the next element
-   function Next (List : in out Skip_List_Type; Position : in out Cursor) return Cursor
-     with Global => (In_Out => (List, Position)),
-          Always_Terminates => True;
+   procedure Next (List : in out Skip_List_Type;
+                  Position : in out Cursor;
+                  Result : out Cursor)
+     with Global => (In_Out => (List, Position));
 
    -- Set the random seed for deterministic probabilistic behavior
    -- This is crucial for verification and testing
