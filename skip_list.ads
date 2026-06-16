@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.25
+--  Version: 0.27
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -80,7 +80,7 @@ package Skip_List is
    function Min_Key (List : Skip_List_Type) return Element_Type;
 
    -- Get the maximum key in the skip list
-   procedure Max_Key (List : Skip_List_Type;
+   procedure Max_Key (List : in out Skip_List_Type;
                      Result : out Element_Type);
 
    -- Iterate through all elements in sorted order
@@ -100,12 +100,12 @@ package Skip_List is
    function Value (Position : Cursor) return Element_Type;
 
    -- Move cursor to the first element
-   procedure First (List : Skip_List_Type;
+   procedure First (List : in out Skip_List_Type;
                    Result : out Cursor);
 
    -- Move cursor to the next element
-   procedure Next (List : Skip_List_Type;
-                  Position : Cursor;
+   procedure Next (List : in out Skip_List_Type;
+                  Position : in out Cursor;
                   Result : out Cursor);
 
    -- Set the random seed for deterministic probabilistic behavior
