@@ -129,10 +129,11 @@ begin
    
    -- Test Min_Key and Max_Key
    Ada.Text_IO.Put_Line("\n--- Testing Min/Max Key ---");
-   if Min_Key(List) = 5 then
+   Min_Key(List, Value);
+   if Value = 5 then
       Ada.Text_IO.Put_Line("✓ Min_Key is 5 (correct).");
    else
-      Ada.Text_IO.Put_Line("✗ Min_Key is " & Min_Key(List)'Image & " (incorrect).");
+      Ada.Text_IO.Put_Line("✗ Min_Key is " & Value'Image & " (incorrect).");
    end if;
    
    Max_Key(List, Value);

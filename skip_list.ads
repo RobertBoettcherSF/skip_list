@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.27
+--  Version: 0.28
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -77,7 +77,8 @@ package Skip_List is
                       Result : out Boolean);
 
    -- Get the minimum key in the skip list
-   function Min_Key (List : Skip_List_Type) return Element_Type;
+   procedure Min_Key (List : in out Skip_List_Type;
+                    Result : out Element_Type);
 
    -- Get the maximum key in the skip list
    procedure Max_Key (List : in out Skip_List_Type;

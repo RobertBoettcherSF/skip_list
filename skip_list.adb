@@ -7,7 +7,7 @@
 --  expected O(log n) operations while maintaining deterministic behavior
 --  when a fixed seed is used.
 --  
---  Version: 0.27
+--  Version: 0.28
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -190,13 +190,14 @@ package body Skip_List is
    end Contains;
 
    -- Get the minimum key in the skip list
-   function Min_Key (List : Skip_List_Type) return Element_Type is
+   procedure Min_Key (List : in out Skip_List_Type;
+                    Result : out Element_Type) is
    begin
       -- The minimum key is the first element at level 0
       if List.Head.Forward(0) = null then
          raise Empty_List_Error;
       end if;
-      return List.Head.Forward(0).all.Key;
+      Result := List.Head.Forward(0).all.Key;
    end Min_Key;
 
    -- Get the maximum key in the skip list
