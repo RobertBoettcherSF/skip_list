@@ -6,7 +6,7 @@
 --  through probabilistic level assignment. Ideal for verification due to
 --  deterministic behavior given a fixed random seed.
 --  
---  Version: 0.29
+--  Version: 0.30
 --  Author: Vibe Code Agent
 --  Date: 2024
 
@@ -95,10 +95,12 @@ package Skip_List is
    function Has_Element (Position : Cursor) return Boolean;
 
    -- Get the key at the current cursor position
-   function Key (Position : Cursor) return Element_Type;
+   function Key (Position : Cursor) return Element_Type
+     with Pre => Has_Element(Position);
 
    -- Get the value at the current cursor position
-   function Value (Position : Cursor) return Element_Type;
+   function Value (Position : Cursor) return Element_Type
+     with Pre => Has_Element(Position);
 
    -- Move cursor to the first element
    procedure First (List : in out Skip_List_Type;
